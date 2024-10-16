@@ -9,7 +9,7 @@ public class Employee {
         this.id = id;
         this.name = name;
         this.address = address;
-        this.hourlyRate = new double[2];
+        this.hourlyRate = new double[3];
         this.hourlyRate[0] = beforeMidnight;
         this.hourlyRate[1] = midnight;
         this.hourlyRate[2] = afterMidnight;
@@ -30,5 +30,13 @@ public class Employee {
 
     public double getHourlyRate(int index) {
         return hourlyRate[index];
+    }
+
+    @Override
+    public String toString() {
+        return "\nEmployee ID: " + id + ",\nName: " + name + ",\nAddress: " + address + 
+               ",\nRates: [\nBefore 9PM: $" + hourlyRate[0] + 
+               ",\n9PM to Midnight: $" + hourlyRate[1] + 
+               ",\nAfter Midnight: $" + hourlyRate[2] + "\n]";
     }
 }
