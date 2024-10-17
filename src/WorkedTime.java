@@ -25,4 +25,10 @@ public class WorkedTime {
     public int getEndMin() {
         return endMin;
     }
+
+    @Override
+    public String toString() {
+        return startHour + ":" + startMin + " - " + endHour + ":" + endMin;
+    }
+
 }

@@ -4,6 +4,7 @@ public class Employee {
     private String name;
     private String address;
     private double[] hourlyRate;
+    private double totalPay;
     
     public Employee(String id, String name, String address, double beforeMidnight, double midnight, double afterMidnight ) {
         this.id = id;
@@ -18,6 +19,14 @@ public class Employee {
 
     public String getId() {
         return id;
+    }
+
+    public double getTotalPay() {
+        return totalPay;
+    }
+    
+    public void setTotalPay(double totalPay) {
+        this.totalPay = totalPay;
     }
     
     public String getName() {

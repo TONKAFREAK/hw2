@@ -7,10 +7,10 @@ public class Payroll {
     private int daysWorked;
     private List<WorkedTime> workedTimes= new ArrayList<>();
 
-    public Payroll(String id, int daysWorked, WorkedTime workedTimes) {
+    public Payroll(String id, int daysWorked, List<WorkedTime> workedTimes) {
         this.id = id;
         this.daysWorked = daysWorked;
-        this.workedTimes.add(workedTimes);
+        this.workedTimes = workedTimes;
     }
 
     public String getId() {
@@ -31,10 +31,10 @@ public class Payroll {
 
     @Override
     public String toString() {
-        return "Payroll{" +
-                "id='" + id + '\'' +
-                ", daysWorked=" + daysWorked +
-                ", workedTimes=" + workedTimes +
-                '}';
+        return "\nPayroll\n{" +
+                "\nid='" + id + '\'' +
+                ",\ndaysWorked=" + daysWorked +
+                ",\nworkedTimes=" + workedTimes +
+                "\n}";
     }
 }
