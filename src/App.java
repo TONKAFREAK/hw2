@@ -1,14 +1,18 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.Date;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.time.Duration;
 
 public class App {
 
+
+    /*
+     * Input: File
+     * Output: List<Employee>
+     * 
+     * reads the file and creates a list of employees and returns it
+    */
     public static List<Employee> readEmployees(File file) {
 
         try {
@@ -73,11 +77,18 @@ public class App {
         }
     }
 
+
+    /*
+     * Input: File
+     * Output: List<Payroll>
+     * 
+     * reads the file and creates a list of payrolls and returns it
+    */
     public static List<Payroll> readPayroll (File file) throws Exception {
         
         Scanner payReader = new Scanner(file);
 
-        List<Payroll> payrolls = new ArrayList<>();
+        List<Payroll> payrolls = new ArrayList<>(); 
         List<WorkedTime> workedTimes = new ArrayList<>();
         String id = "";
         int daysWorked = 0;
@@ -114,76 +125,130 @@ public class App {
 
     }
     
+    /*
+     * Input: List<Payroll>, List<Employee>
+     * Output: void
+     * 
+     * calculates the total pay for each employee for all the days worked.
+    */
     public static void calculatePayroll(List<Payroll> payrolls, List<Employee> employees) {
-    
-        LocalTime ninePM = LocalTime.of(21, 0);   // 9:00 PM
-        LocalTime midnight = LocalTime.MIDNIGHT;  // 12:00 AM
-        double totalPay = 0;
-    
-        for (Payroll payroll : payrolls) {
-            for (Employee employee : employees) {
-                if (employee.getId().equals(payroll.getId())) {
-                    System.out.println(employee.getId() );
-                    for (WorkedTime workedTime : payroll.getWorkedTimes()) {
+        final int PAY_PERIOD1_START = 0;     // 6:00 PM
+        final int PAY_PERIOD1_END = 180;     // 9:00 PM
+        final int PAY_PERIOD2_START = 180;   // 9:00 PM
+        final int PAY_PERIOD2_END = 360;     // 12:00 AM
+        final int PAY_PERIOD3_START = 360;   // 12:00 AM
+        final int PAY_PERIOD3_END = 720;     // 6:00 AM
 
-                        LocalTime startTime = LocalTime.of( 12 +workedTime.getStartHour(), workedTime.getStartMin());
-                        LocalTime endTime;
-                        if (workedTime.getEndHour() == 12) {
-                            endTime = LocalTime.of( 0, workedTime.getEndMin());
-                        } else if (workedTime.getEndHour() > workedTime.getStartHour() ){
-                            endTime = LocalTime.of( 12 +workedTime.getEndHour(), workedTime.getEndMin());
-                        }else {
-                            endTime = LocalTime.of( workedTime.getEndHour(), workedTime.getEndMin());
-                        }
-                        
-                        //System.out.println(startTime + " - " + endTime);
+        for (Employee employee : employees) {
+            double totalPay = 0.0;
+            Payroll payroll = null;
+            for (Payroll p : payrolls) {
+                if (p.getId().equals(employee.getId())) {
+                    payroll = p;
+                    break;
+                }
+            }
+            if (payroll == null) {
+                continue;
+            }
 
-                        if (employee.getId().equals("0001") || employee.getId().equals("0003")) {
+            for (WorkedTime workedTime : payroll.getWorkedTimes()) {
+                int startMinutes = getMinutesSince6PM(workedTime.getStartHour(), workedTime.getStartMin());
+                int endMinutes = getMinutesSince6PM(workedTime.getEndHour(), workedTime.getEndMin());
 
-                            if (startTime.isBefore(ninePM)) {
+                if (endMinutes <= startMinutes) {
+                    endMinutes += 720;
+                }
 
-                                double hoursWorked = (double) Duration.between(startTime, ninePM).toMinutes() / 60;
-                                System.out.println("BEFORE 9: "+hoursWorked+" Hourly pay: "+employee.getHourlyRate(0));
-                                totalPay += employee.getHourlyRate(0) * hoursWorked;
-                                startTime = LocalTime.of(21, 0);
-                                
-                            }
-    
-                            if (startTime.equals(ninePM) && endTime.getHour() > midnight.getHour()) {
-                                LocalTime endTime2 = endTime.getHour() < startTime.getHour() ? LocalTime.of(0, 0) : endTime;
-                                double hoursWorked = (double) Duration.between(startTime, endTime2).toMinutes() / 60;
-                                System.out.println("AFTER 9 AND BEFORE 12: "+hoursWorked+" Hourly pay: "+employee.getHourlyRate(1));
-                                totalPay += employee.getHourlyRate(1) * hoursWorked;
-                                startTime = midnight;
-                            }
-    
-                            if (endTime.getHour() < startTime.getHour()) {
-                                LocalTime endTime2 = endTime.getHour() < startTime.getHour() ? LocalTime.of(12, 0).plusHours(1) : endTime;
-                                double hoursWorked = (double) Duration.between(startTime, endTime2).toMinutes() / 60;
-                                System.out.println("AFTER 12: "+hoursWorked+" Hourly pay: "+employee.getHourlyRate(2));
-                                totalPay += employee.getHourlyRate(2) * hoursWorked;
-                                startTime = endTime;
-                            }
-                            
-                        } 
-    
-                    }
+                int overlapStart = Math.max(startMinutes, PAY_PERIOD1_START);
+                int overlapEnd = Math.min(endMinutes, PAY_PERIOD1_END);
+                if (overlapEnd > overlapStart) {
+                    double hours = (overlapEnd - overlapStart) / 60.0;
+                    totalPay += hours * employee.getHourlyRate(0);
+                }
 
-                    employee.setTotalPay(totalPay);
-                    
-                    if (employee.getId().equals("0001") || employee.getId().equals("0003")) {
-                        System.out.println("Total pay for employee " + employee.getName() + " (" + employee.getId() + "): $" + totalPay);
-                    }
+                overlapStart = Math.max(startMinutes, PAY_PERIOD2_START);
+                overlapEnd = Math.min(endMinutes, PAY_PERIOD2_END);
+                if (overlapEnd > overlapStart) {
+                    double hours = (overlapEnd - overlapStart) / 60.0;
+                    totalPay += hours * employee.getHourlyRate(1);
+                }
 
-                    totalPay = 0;
-                    
+                overlapStart = Math.max(startMinutes, PAY_PERIOD3_START);
+                overlapEnd = Math.min(endMinutes, PAY_PERIOD3_END);
+                if (overlapEnd > overlapStart) {
+                    double hours = (overlapEnd - overlapStart) / 60.0;
+                    totalPay += hours * employee.getHourlyRate(2);
+                }
+            }
+
+            employee.setTotalPay(totalPay);
+        }
+    }
+
+    // -------------------- HELPER METHODS --------------------
+
+    /*
+     * Input: int, int
+     * Output: int
+     * 
+     * returns the number of minutes since 6:00 PM
+    */
+    public static int getMinutesSince6PM(int hour, int minute) {
+        int hour24;
+
+        if (hour >= 6 && hour <= 11) {
+            hour24 = hour + 12; 
+        } else if (hour == 12) {
+            hour24 = 0; 
+        } else if (hour >= 1 && hour <= 5) {
+            hour24 = hour; 
+        } else {
+            
+            System.err.println("Invalid hour: " + hour);
+            return -1;
+        }
+
+        if (hour24 < 18) {
+            hour24 += 24;
+        }
+
+        int totalMinutes = (hour24 - 18) * 60 + minute;
+        return totalMinutes;
+    }
+
+    /*
+     * Input: List<Employee>
+     * Output: void
+     * 
+     * sorts the employees by last name, usses bubble sort algorithm.
+    */
+    public static void sortAndPrintEmployees( List<Employee> employees ) {
+
+        int n = employees.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                String firstName1 = employees.get(j).getName().split(",")[1].trim();
+                String firstName2 = employees.get(j + 1).getName().split(",")[1].trim();
+
+                if (firstName2.compareTo(firstName1) < 0) {
+                    Employee temp = employees.get(j);
+                    employees.set(j, employees.get(j + 1));
+                    employees.set(j + 1, temp);
                 }
             }
         }
+
+        System.out.println("\n:");
+
+        for (Employee employee : employees) {
+            if (employee.getTotalPay() > 0) {
+                System.out.printf("Employee: %s | Pay: $%.2f\n", employee.getName(), employee.getTotalPay());
+            }
+        }
+
     }
     
-
-
     public static void main(String[] args) throws Exception {
         
         List<Employee> employees = readEmployees(new File("personnel_data.txt"));
@@ -192,5 +257,8 @@ public class App {
         //System.out.println(payrolls);
 
         calculatePayroll(payrolls, employees);
+
+        sortAndPrintEmployees(employees);
+
     }
 }
