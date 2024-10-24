@@ -1,3 +1,13 @@
+
+/*
+ * Stores WorkedTime's private information such as:
+ * int : startHour ( start hour of the worked time )
+ * int : startMin ( start minute of the worked time )
+ * int : endHour ( end hour of the worked time )
+ * int : endMin ( end minute of the worked time )
+ * 
+ * has getters and setters , + toString
+*/
 public class WorkedTime {
     
     private int startHour, startMin, endHour, endMin;

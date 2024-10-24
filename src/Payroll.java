@@ -1,6 +1,15 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Stores Payroll's private information such as:
+ * String : id ( id of the employye whom the payroll is for )
+ * int : daysWorked ( number of days worked by the employee )
+ * List<WorkedTime> : workedTimes ( list of worked times object )
+ * 
+ * has getters and setters, + toString
+*/
+
 public class Payroll {
     
     private String id;

@@ -1,3 +1,14 @@
+
+/*
+ * Stores Employee's private information such as:
+ * Int : id 
+ * String : name
+ * String : address
+ * double[] : hourly rate ( list of hourly rates )
+ * double : total pay ( total money earned )
+ * 
+ * has getters and setters, + toString
+*/
 public class Employee {
     
     private String id;
