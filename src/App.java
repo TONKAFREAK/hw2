@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -223,7 +225,7 @@ public class App {
      * 
      * sorts the employees by last name, usses bubble sort algorithm.
     */
-    public static void sortAndPrintEmployees( List<Employee> employees ) {
+    public static List<Employee> sortEmployees( List<Employee> employees ) {
 
         int n = employees.size();
         for (int i = 0; i < n - 1; i++) {
@@ -239,14 +241,23 @@ public class App {
             }
         }
 
-        System.out.println("\n:");
+        return employees;
 
+    }
+
+    public static void printEmployees ( List<Employee> employees ) throws IOException {
+
+        File outputFile = new File("output.txt");
+
+        FileWriter writer = new FileWriter(outputFile);
+        
         for (Employee employee : employees) {
             if (employee.getTotalPay() > 0) {
-                System.out.printf("Employee: %s | Pay: $%.2f\n", employee.getName(), employee.getTotalPay());
+                writer.write("Employee: "+employee.getName()+" | Pay: " + employee.getTotalPay() + "\n");
             }
         }
 
+        writer.close();
     }
     
     public static void main(String[] args) throws Exception {
@@ -258,7 +269,7 @@ public class App {
 
         calculatePayroll(payrolls, employees);
 
-        sortAndPrintEmployees(employees);
+        printEmployees(sortEmployees(employees));
 
     }
 }
